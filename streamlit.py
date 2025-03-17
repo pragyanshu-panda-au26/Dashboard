@@ -502,7 +502,7 @@ if not filtered_data.empty:
 
     # Add column selection for customizable views
     all_columns = filtered_data.columns.tolist()
-    default_columns = ['Property Name', 'BHK', 'Type', 'Price', 'Area', 'Price per sqft', 'Posted By', 'Posted Time']
+    default_columns = ['Property Name', 'BHK', 'Type', 'Price', 'Area (sqft)', 'Price per sqft', 'Posted By', 'Posted Time']
     display_columns = st.multiselect(
         "Select columns to display",
         options=all_columns,
