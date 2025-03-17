@@ -269,7 +269,7 @@ def load_data():
         df = pd.read_csv('noida_properties_all_pages.csv')
         
         # Clean Area column - remove non-numeric characters and convert to float
-        df['Area'] = df['Area'].str.replace('[^\d.]', '', regex=True).astype(float)
+        df['Area'] = df['Area'].str.replace('[^\d.]', '', regex=True).astype(int)
         
         # Handle "Price on Request" or any non-numeric values in the Price column
         df['Price'] = pd.to_numeric(df['Price'], errors='coerce')
