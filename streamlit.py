@@ -471,7 +471,7 @@ if not filtered_data.empty:
         price_volatility_label = "High" if price_cv > 20 else "Medium" if price_cv > 10 else "Low"
         
         st.markdown('<div class="metric-container">', unsafe_allow_html=True)
-        st.metric("Price Volatility", f"{price_volatility_label} ({price_cv:.1f}%)")
+        st.metric("Price Volatility", f"({price_cv:.1f}%)")
         st.markdown('</div>', unsafe_allow_html=True)
     
     # Property data table - more detailed for internal use
