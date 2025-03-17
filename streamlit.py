@@ -295,7 +295,7 @@ df = load_data()
 
 # Internal dashboard header
 st.markdown("<h2>Noida Property Analytics Dashboard</h2>", unsafe_allow_html=True)
-st.markdown("<p style='color: #6B7280; margin-bottom: 20px;'>Internal analysis tool for <a href='https://movin.homes'>Movin.homes©</a>  Tech Lead</p>", unsafe_allow_html=True)
+st.markdown("<p style='color: #6B7280; margin-bottom: 20px;'>Internal analysis tool for <a href='https://movin.homes'>Movin.homes©</a></p>", unsafe_allow_html=True)
 
 # More comprehensive sidebar filters for internal use
 with st.sidebar:
