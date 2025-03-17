@@ -278,6 +278,7 @@ def load_data():
         
         # Clean Price per sqft column and handle any potential issues
         df['Price per sqft'] = pd.to_numeric(df['Price per sqft'], errors='coerce')
+        df['Price per sqft'] = df['Price per sqft'].astype(int)
         
         # If Price per sqft is NaN, calculate it from Price and Area
         mask = df['Price per sqft'].isna()
