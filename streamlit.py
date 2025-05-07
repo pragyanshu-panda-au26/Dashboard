@@ -1,166 +1,8 @@
-# import streamlit as st
-# import pandas as pd
-# import plotly.express as px
-
-# # Load and preprocess data
-# def load_data():
-#     df = pd.read_csv('noida_properties_all_pages.csv')
-#     # Clean numerical columns
-#     df['Area'] = df['Area'].str.replace('[^\d.]', '', regex=True).astype(float)
-#     df['Price'] = df['Price'].astype('int64')
-#     df['Price per sqft'] = df['Price per sqft'].astype('float')
-#     return df
-
-# df = load_data()
-
-# # App header with personal touch
-# st.header("🏡 Noida Property Explorer")
-# st.caption("Built by  MovinHomes© Tech Lead real estate analytics")
-
-# # Interactive filters
-# col1, col2, col3 = st.columns(3)
-# with col1:
-#     society = st.selectbox(
-#         "Select Society", 
-#         options=sorted(df['Property Name'].unique()),
-#         help="Start typing for quick search"
-#     )
-
-# # Dynamic options based on selection
-# society_data = df[df['Property Name'] == society]
-# bhk_options = sorted(society_data['BHK'].unique())
-# location_options = sorted(society_data['Location'].unique())
-
-# with col2:
-#     bhk = st.selectbox("Select BHK", options=bhk_options)
-
-# with col3:
-#     location = st.selectbox("Select Location", options=location_options)
-
-# # Filter data
-# filtered_data = society_data[
-#     (society_data['BHK'] == bhk) & 
-#     (society_data['Location'] == location)
-# ]
-
-# # Display results
-# if not filtered_data.empty:
-#     st.success(f"Found {len(filtered_data)} properties matching your criteria")
-    
-#     # Property listings
-#     st.subheader("📌 Property Details")
-#     st.dataframe(
-#         filtered_data[[
-#             'Price', 'Area', 'Price per sqft', 
-#             'Posted Time', 'Posted By'
-#         ]].reset_index(drop=True),
-#         use_container_width=True
-#     )
-
-#     # Visual analytics
-#     st.subheader("📊 Price Analysis")
-    
-#     tab1, tab2 = st.tabs(["Distribution", "Comparisons"])
-    
-#     with tab1:
-#         fig = px.histogram(
-#             filtered_data, 
-#             x='Price',
-#             title="Price Distribution",
-#             color_discrete_sequence=['#FF4B4B']
-#         )
-#         st.plotly_chart(fig, use_container_width=True)
-
-#     with tab2:
-#         fig = px.scatter(
-#             filtered_data,
-#             x='Area',
-#             y='Price',
-#             size='Price per sqft',
-#             color='Posted By',
-#             title="Price vs Area Analysis"
-#         )
-#         st.plotly_chart(fig, use_container_width=True)
-
-# else:
-#     st.warning("No properties found matching these filters")
-
-
-# st.subheader("📈 High Variance Properties")
-
-# # Make sure we have the main dataframe loaded
-# if 'df' not in locals():
-#     df = load_data()
-
-# # Filter data for the selected location
-# location_data = df[df['Location'] == location].copy()
-
-# if not location_data.empty:
-#     # Group by Property Name and BHK to calculate variance metrics
-#     variance_by_society = location_data.groupby(['Property Name', 'BHK']).agg(
-#         max_price=('Price', 'max'),
-#         min_price=('Price', 'min'),
-#         price_variance=('Price', lambda x: x.max() - x.min()),
-#         avg_price=('Price', 'mean'),
-#         count=('Price', 'count')
-#     ).reset_index()
-    
-#     # Filter for societies with at least 2 properties (to ensure variance can be calculated)
-#     variance_by_society = variance_by_society[variance_by_society['count'] >= 2]
-    
-#     # Sort by highest variance and get top 5
-#     top_variance_societies = variance_by_society.sort_values('price_variance', ascending=False).head(5)
-    
-#     if not top_variance_societies.empty:
-#         st.write(f"Top 5 societies with highest price variance in {location}:")
-        
-#         # Format the data for better readability
-#         top_variance_societies['max_price'] = top_variance_societies['max_price'].apply(lambda x: f"₹{x:,.0f}")
-#         top_variance_societies['min_price'] = top_variance_societies['min_price'].apply(lambda x: f"₹{x:,.0f}")
-#         top_variance_societies['price_variance'] = top_variance_societies['price_variance'].apply(lambda x: f"₹{x:,.0f}")
-#         top_variance_societies['avg_price'] = top_variance_societies['avg_price'].apply(lambda x: f"₹{x:,.0f}")
-        
-#         # Rename columns for better display
-#         top_variance_societies.columns = ['Society', 'BHK', 'Max Price', 'Min Price', 'Price Variance', 'Avg Price', 'Properties']
-        
-#         # Display as a styled dataframe
-#         st.dataframe(top_variance_societies, use_container_width=True)
-        
-#         # Visualize the variance
-#         fig = px.bar(
-#             top_variance_societies, 
-#             x='Society', 
-#             y='Price Variance',
-#             color='BHK',
-#             title=f"Societies with Highest Price Variance in {location}",
-#             text='Price Variance',
-#             barmode='group'
-#         )
-#         fig.update_traces(texttemplate='%{text}', textposition='outside')
-#         fig.update_layout(xaxis_tickangle=-45)
-#         st.plotly_chart(fig, use_container_width=True)
-        
-#         # Add insights
-#         highest_variance_society = top_variance_societies.iloc[0]['Society']
-#         highest_variance_bhk = top_variance_societies.iloc[0]['BHK']
-#         st.info(f"💡 **Insight**: {highest_variance_society} shows the highest price variance for {highest_variance_bhk} BHK properties in {location}. This could indicate potential negotiation opportunities or significant differences in property features like floor level, view, or interior condition.")
-#     else:
-#         st.info(f"Not enough data to calculate meaningful variance in {location}. Most societies have only one property listed per BHK type.")
-# else:
-#     st.warning(f"No properties found in {location} to analyze variance.")
-
-# # Cultural touch in footer
-# st.markdown("---")
-# st.caption("Proudly made in India 🇮🇳 |")
-
-
-# -----------------------------------------
 import streamlit as st
 import pandas as pd
 import plotly.express as px
 import numpy as np
 from datetime import datetime
-import statsmodels
 
 # Initialize session state for filter reset
 if 'reset_clicked' not in st.session_state:
@@ -168,8 +10,8 @@ if 'reset_clicked' not in st.session_state:
 
 # Set page configuration
 st.set_page_config(
-    page_title="Noida Property Analytics",
-    page_icon="ðŸ“Š",
+    page_title="Gurgaon Property Analytics",
+    page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -254,22 +96,14 @@ def reset_filters():
     st.session_state.reset_clicked = True
     return
 
-# Load and preprocess data with caching for performance
-# @st.cache_data
-# def load_data():
-#     df = pd.read_csv('noida_properties_all_pages.csv')
-#     # Clean numerical columns
-#     df['Area'] = df['Area'].str.replace('[^\d.]', '', regex=True).astype(float)
-#     df['Price'] = df['Price'].astype('int64')
-#     df['Price per sqft'] = df['Price per sqft'].astype('float')
-#     return df
 @st.cache_data
 def load_data():
     try:
+        
         df = pd.read_csv('merged_property_data_may2025.csv')
-    
+        
         # Clean Area column - remove non-numeric characters and convert to float
-        df['Area'] = df['Area'].str.replace('[^\d.]', '', regex=True).astype(int)
+        df['Area'] = df['Area'].str.replace('[^\d.]', '', regex=True).astype(float)
         
         # Handle "Price on Request" or any non-numeric values in the Price column
         df['Price'] = pd.to_numeric(df['Price'], errors='coerce')
@@ -277,26 +111,23 @@ def load_data():
         df['Price'] = df['Price'].astype('int64')
         
         # Clean Price per sqft column and handle any potential issues
-        df['Price per sqft'] = pd.to_numeric(df['Price per sqft'], errors='coerce')
-        df['Price per sqft'] = df['Price per sqft'].astype(int)
+        df['Price_Per_Sqft'] = pd.to_numeric(df['Price_Per_Sqft'], errors='coerce')
         
-        # If Price per sqft is NaN, calculate it from Price and Area
-        mask = df['Price per sqft'].isna()
+        # If Price_Per_Sqft is NaN, calculate it from Price and Area
+        mask = df['Price_Per_Sqft'].isna()
         if any(mask):
-            df.loc[mask, 'Price per sqft'] = df.loc[mask, 'Price'] / df.loc[mask, 'Area']
+            df.loc[mask, 'Price_Per_Sqft'] = df.loc[mask, 'Price'] / df.loc[mask, 'Area']
         
         return df
     except Exception as e:
         st.error(f"Error loading data: {e}")
         return pd.DataFrame()
 
-
-
 df = load_data()
 
 # Internal dashboard header
-st.markdown("<h2>Gurugram Property Analytics Dashboard</h2>", unsafe_allow_html=True)
-st.markdown("<p style='color: #6B7280; margin-bottom: 20px;'>Internal analysis tool for <a href='https://movin.homes'>Movin.homes©</a></p>", unsafe_allow_html=True)
+st.markdown("<h2>Gurgaon Property Analytics Dashboard</h2>", unsafe_allow_html=True)
+st.markdown("<p style='color: #6B7280; margin-bottom: 20px;'>Internal analysis tool for <a href='https://movin.homes'>Movin.homes©</a> Tech Lead</p>", unsafe_allow_html=True)
 
 # More comprehensive sidebar filters for internal use
 with st.sidebar:
@@ -324,7 +155,7 @@ with st.sidebar:
         options=sorted(df['Property Name'].unique()),
         index=society_index
     )
-
+    
     # Dynamic options based on selection
     society_data = df[df['Property Name'] == society]
     
@@ -405,9 +236,6 @@ with st.sidebar:
         selected_agents = []
     
     # Reset filters button
-    # if st.button("Reset Filters"):
-    #     reset_filters()
-    #     st.experimental_rerun()
     if st.button("Reset Filters"):
         reset_filters()
         st.rerun()
@@ -451,7 +279,6 @@ if not filtered_data.empty:
     
     with col2:
         st.markdown('<div class="metric-container">', unsafe_allow_html=True)
-        # st.metric("Avg Price", f"₹{filtered_data['Price'].mean():,.0f}")
         st.metric("Avg Price", f"₹{filtered_data['Price'].mean():,.0f}")
         st.markdown('</div>', unsafe_allow_html=True)
     
@@ -462,8 +289,7 @@ if not filtered_data.empty:
         
     with col4:
         st.markdown('<div class="metric-container">', unsafe_allow_html=True)
-        # st.metric("Avg ₹/sqft", f"₹{filtered_data['Price per sqft'].mean():.0f}")
-        st.metric("Avg ₹/sqft", f"₹{filtered_data['Price per sqft'].mean():.0f}")
+        st.metric("Avg ₹/sqft", f"₹{filtered_data['Price_Per_Sqft'].mean():.0f}")
         st.markdown('</div>', unsafe_allow_html=True)
         
     with col5:
@@ -472,38 +298,15 @@ if not filtered_data.empty:
         price_volatility_label = "High" if price_cv > 20 else "Medium" if price_cv > 10 else "Low"
         
         st.markdown('<div class="metric-container">', unsafe_allow_html=True)
-        st.metric("Price Volatility", f"({price_cv:.1f}%)")
+        st.metric("Price Volatility", f"{price_volatility_label} ({price_cv:.1f}%)")
         st.markdown('</div>', unsafe_allow_html=True)
     
-    # Property data table - more detailed for internal use
-    # st.markdown('<div class="section-header">Property Listing Details</div>', unsafe_allow_html=True)
-    
-    # # Add column selection for customizable views
-    # all_columns = filtered_data.columns.tolist()
-    # default_columns = ['Property Name', 'BHK', 'Type', 'Price', 'Area', 'Price per sqft', 'Posted By', 'Posted Time']
-    # display_columns = st.multiselect(
-    #     "Select columns to display",
-    #     options=all_columns,
-    #     default=[col for col in default_columns if col in all_columns]
-    # )
-    
-    # # Show detailed data table with selected columns
-    # if display_columns:
-    #     st.dataframe(
-    #         filtered_data[display_columns],
-    #         use_container_width=True,
-    #         hide_index=True
-    #     )
-    # else:
-    #     st.info("Please select at least one column to display")
-    # Property data table - more detailed for internal use
-    # Property data table - more detailed for internal use
     # Property data table - more detailed for internal use
     st.markdown('<div class="section-header">Property Listing Details</div>', unsafe_allow_html=True)
 
     # Add column selection for customizable views
     all_columns = filtered_data.columns.tolist()
-    default_columns = ['Property Name', 'BHK', 'Type', 'Price', 'Area', 'Price per sqft', 'Posted By', 'Posted Time']
+    default_columns = ['Property Name', 'BHK', 'Type', 'Price', 'Area', 'Price_Per_Sqft', 'Posted By', 'Posted Time']
     display_columns = st.multiselect(
         "Select columns to display",
         options=all_columns,
@@ -540,18 +343,9 @@ if not filtered_data.empty:
             ).to_html(escape=False), 
             unsafe_allow_html=True
         )
-        
-        # Display the dataframe with the new button column
-        # st.dataframe(
-        #     display_df,
-        #     use_container_width=True,
-        #     hide_index=True
-        # )
     else:
         st.info("Please select at least one column to display")
 
-
-    
     # Advanced analytics section
     st.markdown('<div class="section-header">Price Analysis</div>', unsafe_allow_html=True)
     
@@ -613,7 +407,7 @@ if not filtered_data.empty:
                 filtered_data,
                 x='Area',
                 y='Price',
-                size='Price per sqft',
+                size='Price_Per_Sqft',
                 color='Posted By',
                 title="Price vs Area Analysis with Trend",
                 color_discrete_sequence=color_palette,
@@ -651,11 +445,11 @@ if not filtered_data.empty:
     
     # Analyze pricing by posting source if we have enough data
     if len(filtered_data) > 0 and len(filtered_data['Posted By'].unique()) > 1:
-        source_analysis = filtered_data.groupby('Posted By').agg(
+        source_analysis = filtered_data.groupby('Source').agg(
             count=('Price', 'count'),
             avg_price=('Price', 'mean'),
             avg_area=('Area', 'mean'),
-            avg_price_sqft=('Price per sqft', 'mean'),
+            avg_price_sqft=('Price_Per_Sqft', 'mean'),
             min_price=('Price', 'min'),
             max_price=('Price', 'max')
         ).reset_index()
@@ -755,7 +549,7 @@ if not filtered_data.empty:
             st.download_button(
                 label="Download CSV",
                 data=csv,
-                file_name=f"noida_properties_{timestamp}.csv",
+                file_name=f"gurgaon_properties_{timestamp}.csv",
                 mime="text/csv"
             )
         elif export_format == "Excel":
@@ -766,7 +560,7 @@ if not filtered_data.empty:
             st.download_button(
                 label="Download JSON",
                 data=json_data,
-                file_name=f"noida_properties_{timestamp}.json",
+                file_name=f"gurgaon_properties_{timestamp}.json",
                 mime="application/json"
             )
 
