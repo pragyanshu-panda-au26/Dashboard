@@ -266,7 +266,7 @@ def reset_filters():
 @st.cache_data
 def load_data():
     try:
-        df = pd.read_csv('gurgaon_properties_all_pages.csv')
+        df = pd.read_csv('merged_property_data_may2025.csv')
     
         # Clean Area column - remove non-numeric characters and convert to float
         df['Area'] = df['Area'].str.replace('[^\d.]', '', regex=True).astype(int)
