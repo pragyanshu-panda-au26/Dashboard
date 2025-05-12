@@ -106,7 +106,7 @@ def reset_filters():
 @st.cache_data
 def load_data():
     try:
-        df = pd.read_csv("../merged_property_data_may2025.csv")
+        df = pd.read_csv("merged_property_data_may2025.csv")
         df['Area'] = df['Area'].str.replace('[^\d.]', '', regex=True).astype(float)
         df['Price'] = pd.to_numeric(df['Price'], errors='coerce')
         df = df.dropna(subset=['Price'])
