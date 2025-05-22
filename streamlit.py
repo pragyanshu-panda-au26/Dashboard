@@ -106,13 +106,21 @@ def reset_filters():
 @st.cache_data
 def load_data():
     try:
-        df = pd.read_csv("merged_property_data_may2025.csv")
+        df = pd.read_csv("cleaned_property_data_may2025.csv",encoding='latin1')
         df['Area'] = df['Area'].str.replace('[^\d.]', '', regex=True).astype(float)
         df['Price'] = pd.to_numeric(df['Price'], errors='coerce')
         df = df.dropna(subset=['Price'])
         df['Price'] = df['Price'].astype('int64')
         df['Price per sqft'] = pd.to_numeric(df['Price_Per_Sqft'], errors='coerce')
         mask = df['Price per sqft'].isna()
+        # Calculate sum of 'contacted' for each property name
+        contacted_sum_df = df.groupby('Property Name', as_index=False)['contacted'].sum()
+        contacted_sum_df.rename(columns={'contacted': 'Total Contacted'}, inplace=True)
+
+
+        # Merge the sum back to main DataFrame for easy lookup
+        df = df.merge(contacted_sum_df, on='Property Name', how='left')
+
         if any(mask):
             df.loc[mask, 'Price per sqft'] = df.loc[mask, 'Price'] / df.loc[mask, 'Area']
         return df
@@ -123,7 +131,7 @@ def load_data():
 df = load_data()
 
 # Dashboard Header
-st.markdown("<h2>Movin Property Analytics Dashboard</h2>", unsafe_allow_html=True)
+st.markdown("<h2>Noida Property Analytics Dashboard</h2>", unsafe_allow_html=True)
 
 # Sidebar Filters
 with st.sidebar:
@@ -199,7 +207,7 @@ else:
 if not filtered_data.empty:
     # Metrics and Visualizations (Same as before)
     st.markdown('<div class="section-header">Key Metrics</div>', unsafe_allow_html=True)
-    col1, col2, col3, col4, col5 = st.columns(5)
+    col1, col2, col3, col4, col5 , col6= st.columns(6)
 
 
     with col1:
@@ -235,7 +243,15 @@ if not filtered_data.empty:
         st.metric("Price Volatility", f"{price_volatility_label} ({price_cv:.1f}%)")
         st.markdown('</div>', unsafe_allow_html=True)
 
-
+    # ADD THIS for Total Contacted
+    with col6:
+        st.markdown('<div class="metric-container">', unsafe_allow_html=True)
+        # Get the property name selected in the sidebar
+        selected_property = society
+        # Lookup the total contacted for this property
+        total_contacted = int(df[df['Property Name'] == selected_property]['Total Contacted'].iloc[0])
+        st.metric("Total Contacted", f"{total_contacted}")
+        st.markdown('</div>', unsafe_allow_html=True)
 
 if 'Property URL' in filtered_data.columns and 'Source' in filtered_data.columns:
     source_idx = filtered_data.columns.get_loc('Source')
