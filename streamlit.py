@@ -131,7 +131,7 @@ def load_data():
 df = load_data()
 
 # Dashboard Header
-st.markdown("<h2>Noida Property Analytics Dashboard</h2>", unsafe_allow_html=True)
+st.markdown("<h2>Gurgaon Property Analytics Dashboard</h2>", unsafe_allow_html=True)
 
 # Sidebar Filters
 with st.sidebar:
